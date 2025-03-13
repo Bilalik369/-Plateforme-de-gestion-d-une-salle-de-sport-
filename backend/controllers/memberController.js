@@ -1,11 +1,16 @@
+const bcrypt = require('bcryptjs');  
 const User = require('../models/User');
 const Reservation = require('../models/Reservation');
-
+const Session = require('../models/Session');  
 
 exports.updateProfile = async (req, res) => {
   try {
     const { userId } = req.params;
     const { email, password, role } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "L'email et le mot de passe sont requis." });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
@@ -20,16 +25,19 @@ exports.updateProfile = async (req, res) => {
 
     res.status(200).json({ message: "Profil mis à jour" });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error });
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
-
 
 exports.reserveSession = async (req, res) => {
   try {
     const { sessionId, userId } = req.body;
-    const session = await Session.findById(sessionId);
 
+    if (!sessionId || !userId) {
+      return res.status(400).json({ message: "Identifiant utilisateur ou session manquant." });
+    }
+
+    const session = await Session.findById(sessionId);
     if (!session) {
       return res.status(404).json({ message: "Session non trouvée" });
     }
@@ -46,6 +54,6 @@ exports.reserveSession = async (req, res) => {
 
     res.status(200).json({ message: "Réservation effectuée avec succès" });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error });
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
